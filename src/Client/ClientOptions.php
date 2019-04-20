@@ -1,12 +1,10 @@
 <?php
 namespace Dvsa\Olcs\Cpms\Client;
 
-use Zend\Stdlib\AbstractOptions;
-
 /**
  * Class ClientOptions
  */
-class ClientOptions extends AbstractOptions
+class ClientOptions
 {
     /** @var int */
     protected $version = 1;

@@ -6,7 +6,7 @@
          stopOnFailure="false" >
     <testsuites>
         <testsuite name="cpms">
-            <directory>tests/Unit</directory>
+            <directory>test/Unit</directory>
         </testsuite>
     </testsuites>
     <filter>
@@ -16,7 +16,7 @@
     </filter>
     <logging>
         <log type="coverage-text" target="php://stdout" showUncoveredFiles="true"/>
-        <log type="coverage-html" target="tests/coverage" showUncoveredFiles="true"/>
+        <log type="coverage-html" target="test/coverage" showUncoveredFiles="true"/>
         <log type="coverage-clover" target="coverage.xml" showUncoveredFiles="true"/>
     </logging>
 </phpunit>

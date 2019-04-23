@@ -13,58 +13,58 @@ class HttpClientTest extends TestCase
     /**
      * @test
      */
-    public function get_returns_decoded_json_data_with_array()
+    public function getReturnsDecodedJsonDataWithArray()
     {
         $client = $this->setUpMockClient();
-        $clientOptions = new ClientOptions([]);
+        $clientOptions = new ClientOptions();
         $sut  = new HttpClient($client, $clientOptions);
         $data = ["data"=>"test"];
-        $this->appendToHandler(200,[],json_encode($data));
-        $response = $sut->get("/fake-endpoint",[]);
+        $this->appendToHandler(200, [], json_encode($data));
+        $response = $sut->get("/fake-endpoint", []);
         $this->assertSame($data, $response);
     }
 
     /**
      * @test
      */
-    public function get_returns_decoded_json_data_with_class_as_array()
+    public function getReturnsDecodedJsonDataWithClassAsArray()
     {
         $client = $this->setUpMockClient();
-        $clientOptions = new ClientOptions([]);
+        $clientOptions = new ClientOptions();
         $sut  = new HttpClient($client, $clientOptions);
         $data = (new class(){
             public $prop = "test";
         });
-        $this->appendToHandler(200,[],json_encode($data));
-        $response = $sut->get("/fake-endpoint",[]);
+        $this->appendToHandler(200, [], json_encode($data));
+        $response = $sut->get("/fake-endpoint", []);
         $this->assertSame(['prop' => 'test'], $response);
     }
 
     /**
      * @test
      */
-    public function post_returns_decoded_json()
+    public function postReturnsDecodedJson()
     {
         $client = $this->setUpMockClient();
-        $clientOptions = new ClientOptions([]);
+        $clientOptions = new ClientOptions();
         $sut  = new HttpClient($client, $clientOptions);
         $data = ['data' => 'test'];
-        $this->appendToHandler(200,[],json_encode($data));
-        $response = $sut->post("/fake-endpoint",$data);
+        $this->appendToHandler(200, [], json_encode($data));
+        $response = $sut->post("/fake-endpoint", $data);
         $this->assertSame($data, $response);
     }
 
     /**
      * @test
      */
-    public function get_returns_string_when_error()
+    public function getReturnsStringWhenError()
     {
         $client = $this->setUpMockClient();
-        $clientOptions = new ClientOptions([]);
+        $clientOptions = new ClientOptions();
         $sut  = new HttpClient($client, $clientOptions);
         $data = 'something not json';
-        $this->appendToHandler(200,[],$data);
-        $response = $sut->get("/fake-endpoint",[],$data);
+        $this->appendToHandler(200, [], $data);
+        $response = $sut->get("/fake-endpoint", []);
         $this->assertEquals($data, $response);
     }
 }

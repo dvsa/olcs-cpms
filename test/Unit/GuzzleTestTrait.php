@@ -7,7 +7,6 @@ use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Response;
 
-
 /**
  * Trait GuzzleTestTrait
  *
@@ -25,7 +24,6 @@ trait GuzzleTestTrait
      */
     public function setUpMockClient(): Client
     {
-
         $this->mockHandler = new MockHandler();
         $handler = HandlerStack::create($this->mockHandler);
         $client = new Client(['handler' => $handler]);
@@ -34,7 +32,7 @@ trait GuzzleTestTrait
 
     public function appendToHandler($statusCode = 200, $headers = [], $body = '', $version = '1.1', $reason = null)
     {
-        if (!$this->mockHandler) {
+        if (!$this->mockHandler instanceof MockHandler) {
             $this->setUpMockClient();
         }
         $response = new Response($statusCode, $headers, $body, $version, $reason);

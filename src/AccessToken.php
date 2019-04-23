@@ -1,14 +1,12 @@
 <?php
 namespace Dvsa\Olcs\Cpms;
 
-use Zend\Stdlib\AbstractOptions;
-
 /**
  * Class AccessToken
  *
  * @package CpmsClient\Data
  */
-class AccessToken extends AbstractOptions
+class AccessToken
 {
     const INVALID_ACCESS_TOKEN = 114;
     /**

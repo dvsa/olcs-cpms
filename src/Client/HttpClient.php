@@ -50,8 +50,6 @@ class HttpClient
     {
         $decoded = json_decode($response->getBody()->getContents(), true);
 
-
-
         if (empty($decoded) && json_last_error() !== JSON_ERROR_NONE) {
             $response->getBody()->rewind();
             return $response->getBody()->getContents();

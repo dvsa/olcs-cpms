@@ -11,9 +11,8 @@ namespace Dvsa\Olcs\Cpms;
 class AccessToken
 {
     const INVALID_ACCESS_TOKEN = 114;
-    /**
-     * @var string
-     */
+
+    /** @var int */
     protected $expiresIn;
     /** @var  string */
     protected $tokenType;
@@ -79,9 +78,9 @@ class AccessToken
     }
 
     /**
-     * @param string $expiresIn
+     * @param int $expiresIn
      */
-    public function setExpiresIn(string $expiresIn): void
+    public function setExpiresIn(int $expiresIn): void
     {
         $this->expiresIn = $expiresIn;
     }

@@ -1,6 +1,6 @@
 <?php
 
-namespace Dvsa\Olcs\Test\Unit;
+namespace Dvsa\Olcs\Cpms\Test\Unit\Client;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
@@ -10,7 +10,7 @@ use GuzzleHttp\Psr7\Response;
 /**
  * Trait GuzzleTestTrait
  *
- * @package Dvsa\Olcs\Test\Unit
+ * @package Dvsa\Olcs\Cpms\Test\Unit\Client
  */
 trait GuzzleTestTrait
 {

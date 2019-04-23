@@ -30,7 +30,7 @@
     "autoload": {
         "psr-4": {
             "Dvsa\\Olcs\\Cpms\\": "src",
-            "Dvsa\\Olcs\\Test\\": "test"
+            "Dvsa\\Olcs\\Cpms\\Test\\": "test"
         }
     },
     "config": {

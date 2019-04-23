@@ -5,6 +5,11 @@ namespace Dvsa\Olcs\Cpms\Client;
 use GuzzleHttp\Client;
 use Psr\Http\Message\ResponseInterface;
 
+/**
+ * Class HttpClient
+ *
+ * @package Dvsa\Olcs\Cpms\Client
+ */
 class HttpClient
 {
 

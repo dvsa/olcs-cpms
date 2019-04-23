@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
-
 namespace Dvsa\Olcs\Cpms;
+
 
 /**
  * Class AccessToken
@@ -26,15 +26,30 @@ class AccessToken
     /** @var  string */
     protected $salesReference;
 
-    public function __construct($options = null)
+    /**
+     * @var bool
+     */
+    private $__strictMode__;
+
+    /**
+     * AccessToken constructor.
+     *
+     * @param array|null $options
+     */
+    public function __construct(?array $options = null)
     {
-        parent::__construct($options);
+        $this->__strictMode__ = true;
+        if (is_array($options)) {
+            foreach ($options as $key => $value) {
+                $this->__set($key, $value);
+            }
+        }
     }
 
     /**
      * @param int $issuedAt
      */
-    public function setIssuedAt($issuedAt): void
+    public function setIssuedAt(int $issuedAt): void
     {
         $this->issuedAt = $issuedAt;
     }
@@ -66,7 +81,7 @@ class AccessToken
     /**
      * @param string $expiresIn
      */
-    public function setExpiresIn($expiresIn): void
+    public function setExpiresIn(string $expiresIn): void
     {
         $this->expiresIn = $expiresIn;
     }
@@ -76,13 +91,13 @@ class AccessToken
      */
     public function getExpiresIn(): int
     {
-        return (int)$this->expiresIn;
+        return (int) $this->expiresIn;
     }
 
     /**
      * @param string $scope
      */
-    public function setScope($scope): void
+    public function setScope(string $scope): void
     {
         $this->scope = $scope;
     }
@@ -98,7 +113,7 @@ class AccessToken
     /**
      * @param string $tokenType
      */
-    public function setTokenType($tokenType): string
+    public function setTokenType(string $tokenType)
     {
         $this->tokenType = $tokenType;
     }
@@ -136,8 +151,28 @@ class AccessToken
     /**
      * @param string $salesReference
      */
-    public function setSalesReference($salesReference): string
+    public function setSalesReference(string $salesReference)
     {
         $this->salesReference = $salesReference;
+    }
+
+    public function __set($key, $value): void
+    {
+        $setter = 'set' . str_replace('_', '', $key);
+
+        if (is_callable(array($this, $setter))) {
+            $this->{$setter}($value);
+
+            return;
+        }
+
+        if ($this->__strictMode__) {
+            throw new Exception\BadMethodCallException(sprintf(
+                'The option "%s" does not have a callable "%s" ("%s") setter method which must be defined',
+                $key,
+                'set' . str_replace(' ', '', ucwords(str_replace('_', ' ', $key))),
+                $setter
+            ));
+        }
     }
 }

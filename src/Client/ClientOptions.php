@@ -4,6 +4,7 @@ namespace Dvsa\Olcs\Cpms\Client;
 
 /**
  * Class ClientOptions
+ * @codeCoverageIgnore
  */
 class ClientOptions
 {

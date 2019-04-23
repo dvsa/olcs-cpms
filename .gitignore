@@ -1,3 +1,4 @@
 vendor
 coverage.xml
-test/coverage/*
+test/coverage
+test/review

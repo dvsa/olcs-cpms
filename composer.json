@@ -30,21 +30,21 @@
     "autoload": {
         "psr-4": {
             "Dvsa\\Olcs\\Cpms\\": "src",
-            "Dvsa\\Olcs\\Test\\": "tests"
+            "Dvsa\\Olcs\\Test\\": "test"
         }
     },
     "config": {
         "secure-http": false
     },
     "scripts": {
-        "ut": "phpunit --stop-on-failure",
+        "ut": "phpunit test --stop-on-failure",
         "review": "review",
         "cs": "phpcs --severity=1 --standard=vendor/olcs/coding-standards/Profiles/DVSA/CS/ruleset.xml",
         "coverage": "phpunit -c test/phpunit.xml --coverage-html ./test/coverage/html",
         "sonar": "phpunit -c test/phpunit.xml --coverage-clover ./test/coverage/coverage-report.clover --log-junit ./test/coverage/log.junit",
         "update-syms": "composer-update-syms",
         "release": "release",
-        "sa": "phpstan analyse --level 7 src tests --ansi"
+        "sa": "phpstan analyse --level 7 src test --ansi"
     },
     "extra": {
         "branch-alias": {

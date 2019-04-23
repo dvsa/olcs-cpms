@@ -6,7 +6,7 @@ namespace Dvsa\Olcs\Cpms;
 /**
  * Class AccessToken
  *
- * @package CpmsClient\Data
+ * @package Dvsa\Olcs\Cpms
  */
 class AccessToken
 {
@@ -167,7 +167,7 @@ class AccessToken
         }
 
         if ($this->__strictMode__) {
-            throw new Exception\BadMethodCallException(sprintf(
+            throw new \BadFunctionCallException(sprintf(
                 'The option "%s" does not have a callable "%s" ("%s") setter method which must be defined',
                 $key,
                 'set' . str_replace(' ', '', ucwords(str_replace('_', ' ', $key))),

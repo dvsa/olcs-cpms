@@ -38,6 +38,7 @@ trait GuzzleTestTrait
             $this->setUpMockClient();
         }
         $response = new Response($statusCode, $headers, $body, $version, $reason);
+
         $this->mockHandler->append($response);
     }
 }

@@ -53,4 +53,18 @@ class HttpClientTest extends TestCase
         $response = $sut->post("/fake-endpoint",$data);
         $this->assertSame($data, $response);
     }
+
+    /**
+     * @test
+     */
+    public function get_returns_string_when_error()
+    {
+        $client = $this->setUpMockClient();
+        $clientOptions = new ClientOptions([]);
+        $sut  = new HttpClient($client, $clientOptions);
+        $data = 'something not json';
+        $this->appendToHandler(200,[],$data);
+        $response = $sut->get("/fake-endpoint",[],$data);
+        $this->assertEquals($data, $response);
+    }
 }

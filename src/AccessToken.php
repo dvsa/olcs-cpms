@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace Dvsa\Olcs\Cpms;
 
 /**
@@ -26,14 +28,13 @@ class AccessToken
 
     public function __construct($options = null)
     {
-        $this->__strictMode__ = false;
         parent::__construct($options);
     }
 
     /**
      * @param int $issuedAt
      */
-    public function setIssuedAt($issuedAt)
+    public function setIssuedAt($issuedAt): void
     {
         $this->issuedAt = $issuedAt;
     }
@@ -41,7 +42,7 @@ class AccessToken
     /**
      * @return int
      */
-    public function getIssuedAt()
+    public function getIssuedAt(): int
     {
         return $this->issuedAt;
     }
@@ -49,7 +50,7 @@ class AccessToken
     /**
      * @param string $accessToken
      */
-    public function setAccessToken($accessToken)
+    public function setAccessToken($accessToken): void
     {
         $this->accessToken = $accessToken;
     }
@@ -57,7 +58,7 @@ class AccessToken
     /**
      * @return string
      */
-    public function getAccessToken()
+    public function getAccessToken(): string
     {
         return $this->accessToken;
     }
@@ -65,7 +66,7 @@ class AccessToken
     /**
      * @param string $expiresIn
      */
-    public function setExpiresIn($expiresIn)
+    public function setExpiresIn($expiresIn): void
     {
         $this->expiresIn = $expiresIn;
     }
@@ -73,15 +74,15 @@ class AccessToken
     /**
      * @return int
      */
-    public function getExpiresIn()
+    public function getExpiresIn(): int
     {
-        return $this->expiresIn;
+        return (int)$this->expiresIn;
     }
 
     /**
      * @param string $scope
      */
-    public function setScope($scope)
+    public function setScope($scope): void
     {
         $this->scope = $scope;
     }
@@ -89,7 +90,7 @@ class AccessToken
     /**
      * @return string
      */
-    public function getScope()
+    public function getScope(): string
     {
         return $this->scope;
     }
@@ -97,7 +98,7 @@ class AccessToken
     /**
      * @param string $tokenType
      */
-    public function setTokenType($tokenType)
+    public function setTokenType($tokenType): string
     {
         $this->tokenType = $tokenType;
     }
@@ -105,7 +106,7 @@ class AccessToken
     /**
      * @return string
      */
-    public function getTokenType()
+    public function getTokenType(): string
     {
         return $this->tokenType;
     }
@@ -115,7 +116,7 @@ class AccessToken
      *
      * @return bool
      */
-    public function isExpired()
+    public function isExpired(): bool
     {
         $expiryTime = (int)$this->getIssuedAt() + $this->getExpiresIn();
 
@@ -127,7 +128,7 @@ class AccessToken
      *
      * @return string
      */
-    public function getAuthorisationHeader()
+    public function getAuthorisationHeader(): string
     {
         return 'Bearer ' . $this->getAccessToken();
     }
@@ -135,7 +136,7 @@ class AccessToken
     /**
      * @param string $salesReference
      */
-    public function setSalesReference($salesReference)
+    public function setSalesReference($salesReference): string
     {
         $this->salesReference = $salesReference;
     }

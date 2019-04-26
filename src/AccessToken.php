@@ -1,19 +1,18 @@
 <?php
-namespace Dvsa\Olcs\Cpms;
+declare(strict_types=1);
 
-use Zend\Stdlib\AbstractOptions;
+namespace Dvsa\Olcs\Cpms;
 
 /**
  * Class AccessToken
  *
- * @package CpmsClient\Data
+ * @package Dvsa\Olcs\Cpms
  */
-class AccessToken extends AbstractOptions
+class AccessToken
 {
     const INVALID_ACCESS_TOKEN = 114;
-    /**
-     * @var string
-     */
+
+    /** @var int */
     protected $expiresIn;
     /** @var  string */
     protected $tokenType;
@@ -26,16 +25,30 @@ class AccessToken extends AbstractOptions
     /** @var  string */
     protected $salesReference;
 
-    public function __construct($options = null)
+    /**
+     * @var bool
+     */
+    private $__strictMode__;
+
+    /**
+     * AccessToken constructor.
+     *
+     * @param array|null $options
+     */
+    public function __construct(?array $options = null)
     {
-        $this->__strictMode__ = false;
-        parent::__construct($options);
+        $this->__strictMode__ = true;
+        if (is_array($options)) {
+            foreach ($options as $key => $value) {
+                $this->__set($key, $value);
+            }
+        }
     }
 
     /**
      * @param int $issuedAt
      */
-    public function setIssuedAt($issuedAt)
+    public function setIssuedAt(int $issuedAt): void
     {
         $this->issuedAt = $issuedAt;
     }
@@ -43,7 +56,7 @@ class AccessToken extends AbstractOptions
     /**
      * @return int
      */
-    public function getIssuedAt()
+    public function getIssuedAt(): int
     {
         return $this->issuedAt;
     }
@@ -51,7 +64,7 @@ class AccessToken extends AbstractOptions
     /**
      * @param string $accessToken
      */
-    public function setAccessToken($accessToken)
+    public function setAccessToken($accessToken): void
     {
         $this->accessToken = $accessToken;
     }
@@ -59,15 +72,15 @@ class AccessToken extends AbstractOptions
     /**
      * @return string
      */
-    public function getAccessToken()
+    public function getAccessToken(): string
     {
         return $this->accessToken;
     }
 
     /**
-     * @param string $expiresIn
+     * @param int $expiresIn
      */
-    public function setExpiresIn($expiresIn)
+    public function setExpiresIn(int $expiresIn): void
     {
         $this->expiresIn = $expiresIn;
     }
@@ -75,15 +88,15 @@ class AccessToken extends AbstractOptions
     /**
      * @return int
      */
-    public function getExpiresIn()
+    public function getExpiresIn(): int
     {
-        return $this->expiresIn;
+        return (int) $this->expiresIn;
     }
 
     /**
      * @param string $scope
      */
-    public function setScope($scope)
+    public function setScope(string $scope): void
     {
         $this->scope = $scope;
     }
@@ -91,7 +104,7 @@ class AccessToken extends AbstractOptions
     /**
      * @return string
      */
-    public function getScope()
+    public function getScope(): string
     {
         return $this->scope;
     }
@@ -99,7 +112,7 @@ class AccessToken extends AbstractOptions
     /**
      * @param string $tokenType
      */
-    public function setTokenType($tokenType)
+    public function setTokenType(string $tokenType)
     {
         $this->tokenType = $tokenType;
     }
@@ -107,7 +120,7 @@ class AccessToken extends AbstractOptions
     /**
      * @return string
      */
-    public function getTokenType()
+    public function getTokenType(): string
     {
         return $this->tokenType;
     }
@@ -117,7 +130,7 @@ class AccessToken extends AbstractOptions
      *
      * @return bool
      */
-    public function isExpired()
+    public function isExpired(): bool
     {
         $expiryTime = (int)$this->getIssuedAt() + $this->getExpiresIn();
 
@@ -129,7 +142,7 @@ class AccessToken extends AbstractOptions
      *
      * @return string
      */
-    public function getAuthorisationHeader()
+    public function getAuthorisationHeader(): string
     {
         return 'Bearer ' . $this->getAccessToken();
     }
@@ -137,8 +150,28 @@ class AccessToken extends AbstractOptions
     /**
      * @param string $salesReference
      */
-    public function setSalesReference($salesReference)
+    public function setSalesReference(string $salesReference)
     {
         $this->salesReference = $salesReference;
+    }
+
+    public function __set($key, $value): void
+    {
+        $setter = 'set' . str_replace('_', '', $key);
+
+        if (is_callable(array($this, $setter))) {
+            $this->{$setter}($value);
+
+            return;
+        }
+
+        if ($this->__strictMode__) {
+            throw new \BadFunctionCallException(sprintf(
+                'The option "%s" does not have a callable "%s" ("%s") setter method which must be defined',
+                $key,
+                'set' . str_replace(' ', '', ucwords(str_replace('_', ' ', $key))),
+                $setter
+            ));
+        }
     }
 }

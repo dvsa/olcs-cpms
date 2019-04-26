@@ -1,10 +1,15 @@
 <?php
-
+declare(strict_types=1);
 namespace Dvsa\Olcs\Cpms\Client;
 
 use GuzzleHttp\Client;
 use Psr\Http\Message\ResponseInterface;
 
+/**
+ * Class HttpClient
+ *
+ * @package Dvsa\Olcs\Cpms\Client
+ */
 class HttpClient
 {
 
@@ -43,16 +48,17 @@ class HttpClient
 
     protected function decodeResponse(ResponseInterface $response)
     {
-        $decoded = json_decode($response->getBody(), true);
+        $decoded = json_decode($response->getBody()->getContents(), true);
 
-        if (empty($decoded)) {
-            return $response->getBody();
+        if (empty($decoded) && json_last_error() !== JSON_ERROR_NONE) {
+            $response->getBody()->rewind();
+            return $response->getBody()->getContents();
         }
 
         return $decoded;
     }
 
-    protected function buildOptions(string $method, array $data)
+    protected function buildOptions(string $method, array $data): array
     {
         switch ($method) {
             case 'post':
@@ -77,7 +83,7 @@ class HttpClient
         ];
     }
 
-    protected function buildPostQuery(array $data)
+    protected function buildPostQuery(array $data): array
     {
         return [
             'headers' => [
@@ -90,23 +96,11 @@ class HttpClient
     protected function getContentType(string $method): string
     {
         $version = $this->clientOptions->getVersion();
-
-        switch ($method) {
-            case 'get':
-                $format = '';
-                break;
-            case 'post':
-                $format = '+json';
-                break;
-            default:
-                $format = '';
-                break;
-        }
-
+        $format = ($method === 'post') ? "+json" : "";
         return sprintf(static::CONTENT_TYPE_FORMAT, $version, $format);
     }
 
-    protected function buildHeaders()
+    protected function buildHeaders(): array
     {
         return $this->clientOptions->getHeaders();
     }

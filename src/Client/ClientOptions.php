@@ -1,12 +1,12 @@
 <?php
+declare(strict_types=1);
 namespace Dvsa\Olcs\Cpms\Client;
-
-use Zend\Stdlib\AbstractOptions;
 
 /**
  * Class ClientOptions
+ * @codeCoverageIgnore
  */
-class ClientOptions extends AbstractOptions
+class ClientOptions
 {
     /** @var int */
     protected $version = 1;
@@ -24,19 +24,15 @@ class ClientOptions extends AbstractOptions
     protected $grantType;
     /** @var int */
     protected $timeout = 30;
-
-    /**
-     * @return int
-     */
-    public function getTimeout()
-    {
-        return $this->timeout;
-    }
+    /** @var string */
+    protected $domain;
+    /** @var array */
+    protected $headers = array();
 
     /**
      * @param int $timeout
      */
-    public function setTimeout($timeout)
+    public function setTimeout(int $timeout)
     {
         $this->timeout = $timeout;
     }
@@ -44,25 +40,33 @@ class ClientOptions extends AbstractOptions
     /**
      * @return int
      */
-    public function getVersion()
+    public function getTimeout(): int
     {
-        return $this->version;
+        return $this->timeout;
     }
 
     /**
      * @param int $version
      */
-    public function setVersion($version)
+    public function setVersion(int $version)
     {
         $this->version = $version;
     }
 
     /**
-     * @param string $aeIdentity
+     * @return int
      */
-    public function setCustomerReference($aeIdentity)
+    public function getVersion(): int
     {
-        $this->customerReference = $aeIdentity;
+        return $this->version;
+    }
+
+    /**
+     * @param string $customerReference
+     */
+    public function setCustomerReference(string $customerReference)
+    {
+        $this->customerReference = $customerReference;
     }
 
     /**
@@ -76,7 +80,7 @@ class ClientOptions extends AbstractOptions
     /**
      * @param array $endPoints
      */
-    public function setEndPoints($endPoints)
+    public function setEndPoints(array $endPoints)
     {
         $this->endPoints = $endPoints;
     }
@@ -84,7 +88,7 @@ class ClientOptions extends AbstractOptions
     /**
      * @return array
      */
-    public function getEndPoints()
+    public function getEndPoints(): array
     {
         return $this->endPoints;
     }
@@ -92,7 +96,7 @@ class ClientOptions extends AbstractOptions
     /**
      * @param string $grantType
      */
-    public function setGrantType($grantType)
+    public function setGrantType(string $grantType)
     {
         $this->grantType = $grantType;
     }
@@ -100,7 +104,7 @@ class ClientOptions extends AbstractOptions
     /**
      * @return string
      */
-    public function getGrantType()
+    public function getGrantType(): string
     {
         return $this->grantType;
     }
@@ -108,7 +112,7 @@ class ClientOptions extends AbstractOptions
     /**
      * @param string $clientId
      */
-    public function setClientId($clientId)
+    public function setClientId(string $clientId)
     {
         $this->clientId = $clientId;
     }
@@ -116,7 +120,7 @@ class ClientOptions extends AbstractOptions
     /**
      * @return string
      */
-    public function getClientId()
+    public function getClientId(): string
     {
         return $this->clientId;
     }
@@ -124,7 +128,7 @@ class ClientOptions extends AbstractOptions
     /**
      * @param string $clientSecret
      */
-    public function setClientSecret($clientSecret)
+    public function setClientSecret(string $clientSecret)
     {
         $this->clientSecret = $clientSecret;
     }
@@ -132,7 +136,7 @@ class ClientOptions extends AbstractOptions
     /**
      * @return string
      */
-    public function getClientSecret()
+    public function getClientSecret(): string
     {
         return $this->clientSecret;
     }
@@ -140,7 +144,7 @@ class ClientOptions extends AbstractOptions
     /**
      * @param string $userId
      */
-    public function setUserId($userId)
+    public function setUserId(string $userId)
     {
         $this->userId = $userId;
     }
@@ -148,27 +152,15 @@ class ClientOptions extends AbstractOptions
     /**
      * @return string
      */
-    public function getUserId()
+    public function getUserId(): string
     {
         return $this->userId;
     }
 
     /**
-     * Payment Service domain
-     *
-     * @var string
-     */
-    protected $domain;
-
-    /**
-     * @var array
-     */
-    protected $headers = array();
-
-    /**
      * @param string $domain
      */
-    public function setDomain($domain)
+    public function setDomain(string $domain)
     {
         $this->domain = $domain;
     }
@@ -176,7 +168,7 @@ class ClientOptions extends AbstractOptions
     /**
      * @return string
      */
-    public function getDomain()
+    public function getDomain(): string
     {
         return $this->domain;
     }
@@ -184,7 +176,7 @@ class ClientOptions extends AbstractOptions
     /**
      * @param array $headers
      */
-    public function setHeaders($headers)
+    public function setHeaders(array $headers)
     {
         $this->headers = $headers;
     }
@@ -192,7 +184,7 @@ class ClientOptions extends AbstractOptions
     /**
      * @return array
      */
-    public function getHeaders()
+    public function getHeaders(): array
     {
         return $this->headers;
     }

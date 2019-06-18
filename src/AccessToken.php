@@ -12,61 +12,36 @@ class AccessToken
 {
     const INVALID_ACCESS_TOKEN = 114;
 
-    /** @var int */
-    protected $expiresIn;
-    /** @var  string */
-    protected $tokenType;
     /** @var  string */
     protected $accessToken;
-    /** @var  string */
-    protected $scope;
+    /** @var int */
+    protected $expiresIn;
     /** @var  int */
     protected $issuedAt;
     /** @var  string */
+    protected $scope;
+    /** @var  string */
+    protected $tokenType;
+    /** @var  string|null */
     protected $salesReference;
 
     /**
-     * @var bool
-     */
-    private $__strictMode__;
-
-    /**
      * AccessToken constructor.
-     *
-     * @param array|null $options
-     */
-    public function __construct(?array $options = null)
-    {
-        $this->__strictMode__ = true;
-        if (is_array($options)) {
-            foreach ($options as $key => $value) {
-                $this->__set($key, $value);
-            }
-        }
-    }
-
-    /**
-     * @param int $issuedAt
-     */
-    public function setIssuedAt(int $issuedAt): void
-    {
-        $this->issuedAt = $issuedAt;
-    }
-
-    /**
-     * @return int
-     */
-    public function getIssuedAt(): int
-    {
-        return $this->issuedAt;
-    }
-
-    /**
      * @param string $accessToken
+     * @param int $expiresIn
+     * @param int $issuedAt
+     * @param string $scope
+     * @param string $tokenType
+     * @param string|null $salesReference
      */
-    public function setAccessToken($accessToken): void
+    public function __construct(string $accessToken, int $expiresIn, int $issuedAt, string $scope, string $tokenType, ?string $salesReference = null)
     {
         $this->accessToken = $accessToken;
+        $this->expiresIn = $expiresIn;
+        $this->issuedAt = $issuedAt;
+        $this->scope = $scope;
+        $this->tokenType = $tokenType;
+        $this->salesReference = $salesReference;
     }
 
     /**
@@ -78,51 +53,11 @@ class AccessToken
     }
 
     /**
-     * @param int $expiresIn
-     */
-    public function setExpiresIn(int $expiresIn): void
-    {
-        $this->expiresIn = $expiresIn;
-    }
-
-    /**
      * @return int
      */
     public function getExpiresIn(): int
     {
         return (int) $this->expiresIn;
-    }
-
-    /**
-     * @param string $scope
-     */
-    public function setScope(string $scope): void
-    {
-        $this->scope = $scope;
-    }
-
-    /**
-     * @return string
-     */
-    public function getScope(): string
-    {
-        return $this->scope;
-    }
-
-    /**
-     * @param string $tokenType
-     */
-    public function setTokenType(string $tokenType)
-    {
-        $this->tokenType = $tokenType;
-    }
-
-    /**
-     * @return string
-     */
-    public function getTokenType(): string
-    {
-        return $this->tokenType;
     }
 
     /**
@@ -138,6 +73,34 @@ class AccessToken
     }
 
     /**
+     * @return int
+     */
+    public function getIssuedAt(): int
+    {
+        return $this->issuedAt;
+    }
+
+    /**
+     * @codeCoverageIgnore
+     *
+     * @return string
+     */
+    public function getScope(): string
+    {
+        return $this->scope;
+    }
+
+    /**
+     * @codeCoverageIgnore
+     *
+     * @return string
+     */
+    public function getTokenType(): string
+    {
+        return $this->tokenType;
+    }
+
+    /**
      * Get Auth Header
      *
      * @return string
@@ -145,33 +108,5 @@ class AccessToken
     public function getAuthorisationHeader(): string
     {
         return 'Bearer ' . $this->getAccessToken();
-    }
-
-    /**
-     * @param string $salesReference
-     */
-    public function setSalesReference(string $salesReference)
-    {
-        $this->salesReference = $salesReference;
-    }
-
-    public function __set($key, $value): void
-    {
-        $setter = 'set' . str_replace('_', '', $key);
-
-        if (is_callable(array($this, $setter))) {
-            $this->{$setter}($value);
-
-            return;
-        }
-
-        if ($this->__strictMode__) {
-            throw new \BadFunctionCallException(sprintf(
-                'The option "%s" does not have a callable "%s" ("%s") setter method which must be defined',
-                $key,
-                'set' . str_replace(' ', '', ucwords(str_replace('_', ' ', $key))),
-                $setter
-            ));
-        }
     }
 }

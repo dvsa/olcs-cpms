@@ -15,9 +15,14 @@ use GuzzleHttp\Psr7\Response;
 trait GuzzleTestTrait
 {
     /**
+     * @var Response
+     */
+    private $response;
+
+    /**
      * @var MockHandler
      */
-    public $mockHandler;
+    private $mockHandler;
 
     /**
      * @return Client
@@ -35,8 +40,13 @@ trait GuzzleTestTrait
         if (!$this->mockHandler instanceof MockHandler) {
             $this->setUpMockClient();
         }
-        $response = new Response($statusCode, $headers, $body, $version, $reason);
+        $this->response = new Response($statusCode, $headers, $body, $version, $reason);
 
-        $this->mockHandler->append($response);
+        $this->mockHandler->append($this->response);
+    }
+
+    public function getLastRequest()
+    {
+        return $this->mockHandler->getLastRequest();
     }
 }

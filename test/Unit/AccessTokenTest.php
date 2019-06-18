@@ -16,10 +16,13 @@ class AccessTokenTest extends TestCase
      */
     public function isExpired(int $issuedAt, int $expiresIn, bool $isExpired)
     {
-        $accessToken = new AccessToken([
-            'issuedAt' => $issuedAt,
-            'expiresIn' => $expiresIn
-        ]);
+        $accessToken = new AccessToken(
+            "accessToken",
+            $expiresIn,
+            $issuedAt,
+            "scope",
+            "Bearer"
+        );
 
         $this->assertEquals($isExpired, $accessToken->isExpired());
     }
@@ -29,21 +32,17 @@ class AccessTokenTest extends TestCase
      */
     public function getAuthorisationHeader()
     {
-        $accessToken = new AccessToken([
-            'accessToken' => 'testing'
-        ]);
+        $accessToken = new AccessToken(
+            "accessToken",
+            12345,
+            12344,
+            "scope",
+            "Bearer"
+        );
 
         $this->assertStringStartsWith('Bearer ', $accessToken->getAuthorisationHeader());
     }
 
-    /**
-     * @test
-     */
-    public function strictMode()
-    {
-        $this->expectException(\BadFunctionCallException::class);
-        new AccessToken(['incorrect' => true]);
-    }
 
     public function isExpiredDataProvider()
     {

@@ -4,67 +4,221 @@ namespace Dvsa\Olcs\Cpms\Test\Unit\Client;
 
 use Dvsa\Olcs\Cpms\Client\ClientOptions;
 use Dvsa\Olcs\Cpms\Client\HttpClient;
+use GuzzleHttp\Client;
+use Monolog\Handler\TestHandler;
+use Monolog\Logger;
 use PHPUnit\Framework\TestCase;
+use GuzzleHttp\Psr7\Response;
+use Mockery as m;
 
 class HttpClientTest extends TestCase
 {
-    use GuzzleTestTrait;
+    use GuzzleTestTrait, ClientOptionsTestTrait;
 
     /**
-     * @test
+     * @var HttpClient
      */
-    public function getReturnsDecodedJsonDataWithArray()
+    private $sut;
+
+
+    /**
+     * @var Logger
+     */
+    private $logger;
+
+
+    public function setUp()
     {
-        $client = $this->setUpMockClient();
-        $clientOptions = new ClientOptions();
-        $sut  = new HttpClient($client, $clientOptions);
-        $data = ["data"=>"test"];
-        $this->appendToHandler(200, [], json_encode($data));
-        $response = $sut->get("/fake-endpoint", []);
-        $this->assertSame($data, $response);
+        $this->logger = new Logger('cpms_client_logger');
+        $this->logger->pushHandler(new TestHandler());
+
+        $this->sut = new HttpClient(
+            $this->setUpMockClient(),
+            $this->getClientOptions(),
+            $this->logger
+        );
     }
 
     /**
      * @test
      */
-    public function getReturnsDecodedJsonDataWithClassAsArray()
+    public function testGet()
     {
-        $client = $this->setUpMockClient();
-        $clientOptions = new ClientOptions();
-        $sut  = new HttpClient($client, $clientOptions);
-        $data = (new class(){
-            public $prop = "test";
-        });
-        $this->appendToHandler(200, [], json_encode($data));
-        $response = $sut->get("/fake-endpoint", []);
-        $this->assertSame(['prop' => 'test'], $response);
+        $queryData = [
+            'required_fields' => [
+                'payment' => [
+                    'payment_status'
+                ]
+            ]
+        ];
+
+        $encodedResponseBody = json_encode(['exampleGetReponseKey' => 'exampleGetResponseValue']);
+
+        $this->appendToHandler(200, [], $encodedResponseBody);
+
+        $response = $this->sut->get('/get-endpoint', $queryData);
+
+        $this->assertEquals(['exampleGetReponseKey' => 'exampleGetResponseValue'], $response);
+        $this->assertEquals('GET', $this->getLastRequest()->getMethod());
+        $this->assertEquals('api.cpms.domain/get-endpoint', $this->getLastRequest()->getUri()->getPath());
+        $this->assertEquals(
+            'api.cpms.domain/get-endpoint?required_fields%5Bpayment%5D%5B0%5D=payment_status',
+            $this->getLastRequest()->getRequestTarget()
+        );
+        $this->assertEquals(
+            ['application/vnd.dvsa-gov-uk.v2; charset=UTF-8'],
+            $this->getLastRequest()->getHeader('Content-Type')
+        );
+        $this->assertEquals(['application/json'], $this->getLastRequest()->getHeader('Accept'));
+    }
+
+    public function testPost()
+    {
+        $requestBody = ['postRequestBodyKeyExample' => 'postRequestBodyValueExample'];
+        $encodedResponseBody = json_encode(['examplePostReponseKey' => 'examplePostResponseValue']);
+
+        $this->appendToHandler(200, [], $encodedResponseBody);
+
+        $response = $this->sut->post('/post-endpoint', $requestBody);
+
+        $this->assertEquals('POST', $this->getLastRequest()->getMethod());
+        $this->assertEquals('api.cpms.domain/post-endpoint', $this->getLastRequest()->getRequestTarget());
+        $this->assertEquals(
+            ['application/vnd.dvsa-gov-uk.v2+json; charset=UTF-8'],
+            $this->getLastRequest()->getHeader('Content-Type')
+        );
+        $this->assertEquals(['application/json'], $this->getLastRequest()->getHeader('Accept'));
+        $this->assertEquals(['examplePostReponseKey' => 'examplePostResponseValue'], $response);
+    }
+
+    public function testPut()
+    {
+        $requestBody = ['putRequestBodyKeyExample' => 'putRequestBodyValueExample'];
+        $encodedResponseBody = json_encode(['examplePutReponseKey' => 'examplePutResponseValue']);
+
+        $this->appendToHandler(200, [], $encodedResponseBody);
+
+        $response = $this->sut->put('/put-endpoint', $requestBody);
+
+        $this->assertEquals('PUT', $this->getLastRequest()->getMethod());
+        $this->assertEquals('api.cpms.domain/put-endpoint', $this->getLastRequest()->getRequestTarget());
+        $this->assertEquals(
+            ['application/vnd.dvsa-gov-uk.v2+json; charset=UTF-8'],
+            $this->getLastRequest()->getHeader('Content-Type')
+        );
+        $this->assertEquals(['application/json'], $this->getLastRequest()->getHeader('Accept'));
+        $this->assertEquals(['examplePutReponseKey' => 'examplePutResponseValue'], $response);
+    }
+
+    public function testResetHeaders()
+    {
+        $this->setUp();
+        $clientOptions = $this->sut->getClientOptions();
+        $clientOptions->setHeaders(['Authorization' => 'Bearer AKSNKDJNAJNBQJ121321NMM']);
+
+        $this->sut->resetHeaders();
+
+        $this->assertEquals([], $clientOptions->getHeaders());
     }
 
     /**
-     * @test
+     * @dataProvider dpTestLogResponseOnSuccess
      */
-    public function postReturnsDecodedJson()
+    public function testLogResponseOnSuccess($statusCode)
     {
-        $client = $this->setUpMockClient();
-        $clientOptions = new ClientOptions();
-        $sut  = new HttpClient($client, $clientOptions);
-        $data = ['data' => 'test'];
-        $this->appendToHandler(200, [], json_encode($data));
-        $response = $sut->post("/fake-endpoint", $data);
-        $this->assertSame($data, $response);
+        $requestBody = ['postRequestBodyKeyExample' => 'postRequestBodyValueExample'];
+        $encodedResponseBody = json_encode(['access_token' => 'someAccessToken']);
+
+        $this->appendToHandler($statusCode, [], $encodedResponseBody);
+
+        $this->sut->put('/post-endpoint', $requestBody);
+
+        $expectedDebugLogMessage = "Request URI: api.cpms.domain/post-endpoint\n Response code: $statusCode\n Response body: {\"access_token\":\"****\"}";
+        $expectedInfoLogMessage = "Request URI: api.cpms.domain/post-endpoint\n Response code: $statusCode";
+
+        $this->assertEquals(true, $this->logger->getHandlers()[0]->hasDebugRecords());
+        $this->assertEquals(true, $this->logger->getHandlers()[0]->hasInfoRecords());
+        $this->assertEquals(false, $this->logger->getHandlers()[0]->hasErrorRecords());
+        $this->assertEquals($expectedInfoLogMessage, $this->logger->getHandlers()[0]->getRecords()[0]['message']);
+        $this->assertEquals($expectedDebugLogMessage, $this->logger->getHandlers()[0]->getRecords()[1]['message']);
+    }
+
+    public function dpTestLogResponseOnSuccess()
+    {
+        return [
+            [
+                'statusCode' => 200
+            ],
+            [
+                'statusCode' => 300
+            ]
+        ];
     }
 
     /**
-     * @test
+     * @dataProvider dpTestLogResponseOnFailure
      */
-    public function getReturnsStringWhenError()
+    public function testLogResponseOnFailure($dpData)
     {
-        $client = $this->setUpMockClient();
-        $clientOptions = new ClientOptions();
-        $sut  = new HttpClient($client, $clientOptions);
-        $data = 'something not json';
-        $this->appendToHandler(200, [], $data);
-        $response = $sut->get("/fake-endpoint", []);
-        $this->assertEquals($data, $response);
+        $statusCode = $dpData['statusCode'];
+        $encodedResponseBody = $dpData['responseBody'];
+
+        $this->logger = new Logger('cpms_client_logger');
+        $this->logger->pushHandler(new TestHandler());
+
+        $mockClient = m::mock(Client::class);
+
+        $this->sut = new HttpClient(
+            $mockClient,
+            $this->getClientOptions(),
+            $this->logger
+        );
+
+        $response = new Response(
+            $statusCode,
+            [],
+            $encodedResponseBody,
+            '1.1',
+            null
+        );
+
+        $mockClient->shouldReceive('post')->andReturn($response);
+
+        $requestBody = ['postRequestBodyKeyExample' => 'postRequestBodyValueExample'];
+        $result = $this->sut->post('/post-fail-endpoint', $requestBody);
+
+        $expectedErrorLogMessage = "Request URI: api.cpms.domain/post-fail-endpoint\n Response code: $statusCode";
+        $this->assertEquals($expectedErrorLogMessage, $this->logger->getHandlers()[0]->getRecords()[0]['message']);
+        $this->assertEquals(false, $this->logger->getHandlers()[0]->hasDebugRecords());
+        $this->assertEquals(false, $this->logger->getHandlers()[0]->hasInfoRecords());
+        $this->assertEquals(true, $this->logger->getHandlers()[0]->hasErrorRecords());
+        $this->assertEquals($dpData['expectedResponse'], $result);
+    }
+
+    public function dpTestLogResponseOnFailure()
+    {
+        return [
+            'client_error' => [
+                [
+                    'statusCode' => 400,
+                    'responseBody' => json_encode(['error' => 'client error']),
+                    'expectedResponse' => ['error' => 'client error']
+                ]
+            ],
+            'server_error' => [
+                [
+                    'statusCode' => 500,
+                    'responseBody' => json_encode(['error' => 'server error']),
+                    'expectedResponse' => ['error' => 'server error']
+                ]
+            ],
+            'server_error_empty_response' => [
+                [
+                    'statusCode' => 500,
+                    'responseBody' => '',
+                    'expectedResponse' => ''
+                ]
+            ]
+        ];
     }
 }

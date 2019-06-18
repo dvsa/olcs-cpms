@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace Dvsa\Olcs\Cpms\Authenticate;
 
 /**
@@ -11,29 +13,32 @@ interface IdentityProviderInterface
      *
      * @return string
      */
-    public function getClientId();
+    public function getClientId(): string;
 
     /**
      * OAuth 2.0 client_secret
      *
      * @return string
      */
-    public function getClientSecret();
+    public function getClientSecret(): string;
 
     /**
-     * Logged in user (OpenAM UUID)
+     * Logged in user (user.id)
      *
      * @return string
      */
-    public function getUserId();
+    public function getUserId(): string;
 
     /**
      * Get the reference to the customer the payment is for
      *
-     * @return mixed
      */
-    public function getCustomerReference();
+    public function getCustomerReference(): ?string;
 
-    /** string */
-    public function getCostCentre();
+    /**
+     * Get the cost centre
+     *
+     * @return string
+     */
+    public function getCostCentre(): string;
 }

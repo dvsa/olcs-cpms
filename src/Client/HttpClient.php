@@ -1,19 +1,22 @@
 <?php
 declare(strict_types=1);
+
 namespace Dvsa\Olcs\Cpms\Client;
 
 use GuzzleHttp\Client;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Log\LoggerInterface as Logger;
 
 /**
  * Class HttpClient
- *
- * @package Dvsa\Olcs\Cpms\Client
  */
 class HttpClient
 {
-
     const CONTENT_TYPE_FORMAT = 'application/vnd.dvsa-gov-uk.v%d%s; charset=UTF-8';
+
+    const METHOD_GET = 'get';
+    const METHOD_PUT = 'put';
+    const METHOD_POST = 'post';
 
     /**
      * @var Client
@@ -25,34 +28,70 @@ class HttpClient
      */
     protected $clientOptions;
 
+    protected $logger;
 
-    public function __construct(Client $client, ClientOptions $clientOptions)
+    public function __construct(Client $client, ClientOptions $clientOptions, Logger $logger)
     {
         $this->client = $client;
         $this->clientOptions = $clientOptions;
+        $this->logger = $logger;
     }
 
     public function get(string $endpoint, array $data)
     {
-        $response = $this->client->get($endpoint, $this->buildOptions('get', $data));
+        $uri = $this->buildURI($endpoint);
+        $response = $this->client->get($uri, $this->buildOptions(self::METHOD_GET, $data));
+
+        $this->logResponse($response, $uri);
 
         return $this->decodeResponse($response);
     }
 
     public function post(string $endpoint, array $data)
     {
-        $response = $this->client->post($endpoint, $this->buildOptions('post', $data));
+        $uri = $this->buildURI($endpoint);
+        $response = $this->client->post($uri, $this->buildOptions(self::METHOD_POST, $data));
+
+        $this->logResponse($response, $uri);
 
         return $this->decodeResponse($response);
     }
 
+    public function put(string $endpoint, array $data)
+    {
+        $uri = $this->buildURI($endpoint);
+        $response = $this->client->put($uri, $this->buildOptions(self::METHOD_PUT, $data));
+
+        $this->logResponse($response, $uri);
+
+        return $this->decodeResponse($response);
+    }
+
+    public function resetHeaders(): void
+    {
+        $headers = $this->clientOptions->getHeaders();
+
+        if (isset($headers['Authorization'])) {
+            unset($headers['Authorization']);
+        }
+
+        $this->clientOptions->setHeaders($headers);
+    }
+
+    public function getClientOptions(): ClientOptions
+    {
+        return $this->clientOptions;
+    }
+
     protected function decodeResponse(ResponseInterface $response)
     {
-        $decoded = json_decode($response->getBody()->getContents(), true);
+        $response->getBody()->rewind();
+        $responseBody = $response->getBody()->getContents();
+
+        $decoded = json_decode($responseBody, true);
 
         if (empty($decoded) && json_last_error() !== JSON_ERROR_NONE) {
-            $response->getBody()->rewind();
-            return $response->getBody()->getContents();
+            return $responseBody;
         }
 
         return $decoded;
@@ -61,10 +100,11 @@ class HttpClient
     protected function buildOptions(string $method, array $data): array
     {
         switch ($method) {
-            case 'post':
-                $options = $this->buildPostQuery($data);
+            case self::METHOD_PUT:
+            case self::METHOD_POST:
+                $options = $this->buildPostOrPutQuery($data, $method);
                 break;
-            case 'get':
+            case self::METHOD_GET:
             default:
                 $options = $this->buildGetQuery($data);
         }
@@ -72,36 +112,70 @@ class HttpClient
         $options['headers'] = array_merge($options['headers'], $this->buildHeaders());
         return $options;
     }
-    
+
     protected function buildGetQuery(array $data): array
     {
         return [
             'headers' => [
-                'Content-Type' => $this->getContentType('get')
+                'Content-Type' => $this->getContentType(self::METHOD_GET)
             ],
             'query' => $data
         ];
     }
 
-    protected function buildPostQuery(array $data): array
+    protected function buildPostOrPutQuery(array $data, string $method): array
     {
         return [
             'headers' => [
-                'Content-Type' => $this->getContentType('post')
+                'Content-Type' => $this->getContentType($method)
             ],
-            'json' => json_encode($data)
+            'body' => json_encode($data)
         ];
     }
 
     protected function getContentType(string $method): string
     {
+        $httpMethods = [
+            self::METHOD_POST,
+            self::METHOD_PUT
+        ];
         $version = $this->clientOptions->getVersion();
-        $format = ($method === 'post') ? "+json" : "";
+        $format = (in_array($method, $httpMethods)) ? "+json" : "";
         return sprintf(static::CONTENT_TYPE_FORMAT, $version, $format);
     }
 
     protected function buildHeaders(): array
     {
         return $this->clientOptions->getHeaders();
+    }
+
+    protected function buildURI(string $endpoint): string
+    {
+        $uri = rtrim($this->clientOptions->getDomain(), '/') . '/' . ltrim($endpoint, '/');
+
+        return $uri;
+    }
+
+    protected function logResponse(ResponseInterface $response, string $uri): void
+    {
+        $response->getBody()->rewind();
+        $responseCode = $response->getStatusCode();
+        $responseBody = $response->getBody()->getContents();
+        $filteredResponseBody = $this->filterResponseBody($responseBody);
+
+        $detailedLogMessage = "Request URI: $uri" . "\n Response code: " . $responseCode . "\n Response body: " . $filteredResponseBody;
+        $shortLogMessage = "Request URI: $uri" . "\n Response code: " . $responseCode;
+
+        if ($responseCode >= 400) {
+            $this->logger->error($shortLogMessage);
+        } else {
+            $this->logger->info($shortLogMessage);
+            $this->logger->debug($detailedLogMessage);
+        }
+    }
+
+    protected function filterResponseBody(string $responseBody) : ?string
+    {
+        return preg_replace('/(access_token":")([\d|\w]*)/', '$1****', $responseBody);
     }
 }

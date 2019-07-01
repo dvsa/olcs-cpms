@@ -198,17 +198,19 @@ class ApiService
         return $response;
     }
 
-    private function returnErrorMessage(\Exception $exception): array
+    private function returnErrorMessage(\Exception $exception): string
     {
         $errorId = $this->getErrorId();
-        $exceptionStackTrace = $exception->getTraceAsString();
-        $message = sprintf("An unknown error occurred, ID %s\n%s", $errorId, $exceptionStackTrace);
+        $responseBody = $exception->getResponse()->getBody();
+        $responseBody->rewind();
+        $responseBodyContents = $responseBody->getContents();
+        $message = sprintf("An unknown error occurred, ID %s\n%s", $errorId, $responseBodyContents);
 
         $this->logger->error($message);
 
-        return [
-            'message' => $message
-        ];
+        $decodedResponseBodyContents = json_decode($responseBodyContents);
+
+        return $decodedResponseBodyContents->message;
     }
 
     /**

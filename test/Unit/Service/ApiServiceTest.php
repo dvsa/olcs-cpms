@@ -197,7 +197,7 @@ class ApiServiceTest extends TestCase
 
     public function testGetCpmsAccessTokenFailureWithBadResponse()
     {
-        $this->appendToHandler(400, [], 'cannot process payment');
+        $this->appendToHandler(400, [], json_encode(['code' => '105', 'message' => 'cannot process payment']));
 
         $params = [
             'batch_number' => 'abc123',

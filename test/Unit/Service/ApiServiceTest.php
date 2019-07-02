@@ -197,7 +197,7 @@ class ApiServiceTest extends TestCase
 
     public function testGetCpmsAccessTokenFailureWithBadResponse()
     {
-        $this->appendToHandler(400, [], json_encode(['code' => '105', 'message' => 'access token request has failed']));
+        $this->appendToHandler(400, [], 'cannot process payment');
 
         $params = [
             'batch_number' => 'abc123',
@@ -207,7 +207,7 @@ class ApiServiceTest extends TestCase
 
         $response = $this->sut->get('/get/payment-status', 'CARD', $params);
 
-        $this->assertEquals(json_encode(['code' => '105', 'message' => 'access token request has failed']), $response);
+        $this->assertEquals('cannot process payment', $response);
     }
 
     public function testGetCpmsAccessTokenFailureWithNonGuzzleException()

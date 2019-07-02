@@ -206,6 +206,7 @@ class ApiService
             $responseBody = $exception->getResponse()->getBody();
             $responseBody->rewind();
             $message = $responseBody->getContents();
+            echo $message;
         } else {
             $message = $exception->getMessage();
         }

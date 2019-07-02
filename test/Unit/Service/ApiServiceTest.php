@@ -11,6 +11,7 @@ use Dvsa\Olcs\Cpms\Test\Unit\Client\GuzzleTestTrait;
 use Monolog\Handler\TestHandler;
 use Monolog\Logger;
 use PHPUnit\Framework\TestCase;
+use Mockery as m;
 
 class ApiServiceTest extends TestCase
 {
@@ -206,6 +207,28 @@ class ApiServiceTest extends TestCase
 
         $response = $this->sut->get('/get/payment-status', 'CARD', $params);
 
-        $this->assertEquals('access token request has failed', $response);
+        $this->assertEquals(json_encode(['code' => '105', 'message' => 'access token request has failed']), $response);
+    }
+
+    public function testGetCpmsAccessTokenFailureWithNonGuzzleException()
+    {
+        $mockHttpClient = m::mock(HttpClient::class);
+        $mockHttpClient->shouldReceive('getClientOptions')->andReturn($this->getClientOptions());
+        $mockHttpClient->shouldReceive('post')->andThrow(\Exception::class, 'This is a non-guzzle exception');
+
+        $sut = new ApiService(
+            $mockHttpClient,
+            $this->identity,
+            $this->logger
+        );
+
+        $params = [
+            'batch_number' => 'abc123',
+            'total_amount' => 200,
+            'payment_data' => []
+        ];
+        
+        $response = $sut->get('/get/payment-status', 'CARD', $params);
+        $this->assertEquals('This is a non-guzzle exception', $response);
     }
 }

@@ -201,16 +201,19 @@ class ApiService
     private function returnErrorMessage(\Exception $exception): string
     {
         $errorId = $this->getErrorId();
-        $responseBody = $exception->getResponse()->getBody();
-        $responseBody->rewind();
-        $responseBodyContents = $responseBody->getContents();
-        $message = sprintf("An unknown error occurred, ID %s\n%s", $errorId, $responseBodyContents);
 
-        $this->logger->error($message);
+        if (method_exists($exception, 'getResponse')) {
+            $responseBody = $exception->getResponse()->getBody();
+            $responseBody->rewind();
+            $message = $responseBody->getContents();
+        } else {
+            $message = $exception->getMessage();
+        }
 
-        $decodedResponseBodyContents = json_decode($responseBodyContents);
+        $logMessage = sprintf("An unknown error occurred, ID %s\n%s", $errorId, $message);
+        $this->logger->error($logMessage);
 
-        return $decodedResponseBodyContents->message;
+        return $message;
     }
 
     /**

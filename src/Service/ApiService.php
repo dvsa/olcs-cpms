@@ -205,8 +205,8 @@ class ApiService
         if (method_exists($exception, 'getResponse')) {
             $responseBody = $exception->getResponse()->getBody();
             $responseBody->rewind();
-            $message = $responseBody->getContents();
-            echo $message;
+            $message = json_decode($responseBody->getContents());
+            $message = $message->message;
         } else {
             $message = $exception->getMessage();
         }

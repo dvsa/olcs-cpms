@@ -231,4 +231,19 @@ class ApiServiceTest extends TestCase
         $response = $sut->get('/get/payment-status', 'CARD', $params);
         $this->assertEquals('This is a non-guzzle exception', $response);
     }
+
+    public function testReturnErrorMessageWhenResponseMessageNull()
+    {
+        $this->appendToHandler(503, [], json_encode(['code' => '105', 'message' => null]));
+
+        $params = [
+            'batch_number' => 'abc123',
+            'total_amount' => 200,
+            'payment_data' => []
+        ];
+
+        $response = $this->sut->get('/get/payment-status', 'CARD', $params);
+
+        $this->assertEquals('Unknown CPMS error', $response);
+    }
 }

@@ -206,12 +206,12 @@ class ApiService
             $responseBody = $exception->getResponse()->getBody();
             $responseBody->rewind();
             $message = json_decode($responseBody->getContents());
-            $message = $message->message;
+            $message = $message->message ?? 'Unknown CPMS error';
         } else {
             $message = $exception->getMessage();
         }
 
-        $logMessage = sprintf("An unknown error occurred, ID %s\n%s", $errorId, $message);
+        $logMessage = sprintf("An error occurred, ID %s\n%s", $errorId, $message);
         $this->logger->error($logMessage);
 
         return $message;

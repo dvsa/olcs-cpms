@@ -45,7 +45,7 @@
         "sonar": "phpunit -c test/phpunit.xml --coverage-clover ./test/coverage/coverage-report.clover --log-junit ./test/coverage/log.junit",
         "update-syms": "composer-update-syms",
         "release": "release",
-        "sa": "phpstan analyse --level 7 src test --ansi"
+        "sa": "phpstan analyse --level 7 src --ansi"
     },
     "extra": {
         "branch-alias": {

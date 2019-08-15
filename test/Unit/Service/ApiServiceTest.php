@@ -229,7 +229,7 @@ class ApiServiceTest extends TestCase
             'total_amount' => 200,
             'payment_data' => []
         ];
-        
+
         $response = $sut->get('/get/payment-status', 'CARD', $params);
         $this->assertEquals('This is a non-guzzle exception', $response);
     }
@@ -261,6 +261,9 @@ class ApiServiceTest extends TestCase
 
         $response = $this->sut->get('/get/payment-status', 'CARD', $params);
 
-        $this->assertEquals('Error: Request time out', $response);
+        $this->assertEquals(
+            'Server error: `POST api.cpms.domain/api/token` resulted in a `503 Service Unavailable` response:\n{"code":"105","message":null}\n',
+            $response
+        );
     }
 }

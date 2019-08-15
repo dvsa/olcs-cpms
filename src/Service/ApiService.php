@@ -7,6 +7,7 @@ use Dvsa\Olcs\Cpms\AccessToken;
 use Dvsa\Olcs\Cpms\Authenticate\CpmsIdentityProvider;
 use Dvsa\Olcs\Cpms\Client\ClientOptions;
 use Dvsa\Olcs\Cpms\Client\HttpClient;
+use GuzzleHttp\Exception\RequestException;
 use Psr\Log\LoggerInterface as Logger;
 
 class ApiService
@@ -138,6 +139,8 @@ class ApiService
     ) {
         $salesReference = $this->getSalesReferenceFromParams($params);
 
+        $message = 'Unknown CPMS error';
+
         try {
             //Get access token
             $token = $this->getCpmsAccessToken($scope, $salesReference);
@@ -149,13 +152,21 @@ class ApiService
                 $this->getOptions()->setHeaders($headers);
 
                 $response = $this->getHttpClient()->$method($endPoint, $params);
-
                 return $response;
             } else {
                 return $token;
             }
-        } catch (\Exception $exception) {
-            return $this->returnErrorMessage($exception);
+        } catch (RequestException $e) {
+            if ($e->hasResponse()) {
+                $responseBody = $e->getResponse()->getBody();
+                $responseBody->rewind();
+                $messageObj = json_decode($responseBody->getContents());
+            }
+            $message = $messageObj->message ?? $e->getMessage() ?? $message;
+            return $this->returnErrorMessage($message);
+        } catch (\Exception $e) {
+            $message = $e->getMessage();
+            return $this->returnErrorMessage($message);
         }
     }
 
@@ -198,20 +209,9 @@ class ApiService
         return $response;
     }
 
-    private function returnErrorMessage(\Exception $exception): string
+    private function returnErrorMessage(string $message): string
     {
-        $errorId = $this->getErrorId();
-
-        if (method_exists($exception, 'getResponse') && $exception->getResponse() !== null) {
-            $responseBody = $exception->getResponse()->getBody();
-            $responseBody->rewind();
-            $message = json_decode($responseBody->getContents());
-            $message = $message->message ?? 'Unknown CPMS error';
-        } else {
-            $message = $exception->getMessage();
-        }
-
-        $logMessage = sprintf("An error occurred, ID %s\n%s", $errorId, $message);
+        $logMessage = sprintf("An error occurred, ID %s\n%s", $this->getErrorId(), $message);
         $this->logger->error($logMessage);
 
         return $message;

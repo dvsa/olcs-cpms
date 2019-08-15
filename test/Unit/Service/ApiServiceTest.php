@@ -8,6 +8,8 @@ use Dvsa\Olcs\Cpms\Client\HttpClient;
 use Dvsa\Olcs\Cpms\Service\ApiService;
 use Dvsa\Olcs\Cpms\Test\Unit\Client\ClientOptionsTestTrait;
 use Dvsa\Olcs\Cpms\Test\Unit\Client\GuzzleTestTrait;
+use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Psr7\Request;
 use Monolog\Handler\TestHandler;
 use Monolog\Logger;
 use PHPUnit\Framework\TestCase;
@@ -245,5 +247,20 @@ class ApiServiceTest extends TestCase
         $response = $this->sut->get('/get/payment-status', 'CARD', $params);
 
         $this->assertEquals('Unknown CPMS error', $response);
+    }
+
+    public function testReturnErrorMessageWhenResponseTimeout()
+    {
+        $this->mockHandler->append(new RequestException("Error: Request time out", new Request('GET', '/some-uri')));
+
+        $params = [
+            'batch_number' => 'abc123',
+            'total_amount' => 200,
+            'payment_data' => []
+        ];
+
+        $response = $this->sut->get('/get/payment-status', 'CARD', $params);
+
+        $this->assertEquals('Error: Request time out', $response);
     }
 }

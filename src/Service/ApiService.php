@@ -202,7 +202,7 @@ class ApiService
     {
         $errorId = $this->getErrorId();
 
-        if (method_exists($exception, 'getResponse')) {
+        if (method_exists($exception, 'getResponse') && $exception->getResponse() !== null) {
             $responseBody = $exception->getResponse()->getBody();
             $responseBody->rewind();
             $message = json_decode($responseBody->getContents());

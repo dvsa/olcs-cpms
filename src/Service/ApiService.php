@@ -158,11 +158,8 @@ class ApiService
             if ($token instanceof AccessToken) {
                 $headers = $this->getOptions()->getHeaders();
                 $headers['Authorization'] = $token->getAuthorisationHeader();
-
                 $this->getOptions()->setHeaders($headers);
-
                 $response = $this->getHttpClient()->$method($endPoint, $params);
-
                 return $response;
             } else {
                 return $token;

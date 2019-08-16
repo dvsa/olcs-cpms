@@ -83,6 +83,12 @@ class HttpClient
         return $this->clientOptions;
     }
 
+
+    /**
+     * @param ResponseInterface $response
+     *
+     * @return mixed
+     */
     protected function decodeResponse(ResponseInterface $response)
     {
         $response->getBody()->rewind();

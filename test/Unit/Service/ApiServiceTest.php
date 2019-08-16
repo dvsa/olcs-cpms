@@ -8,6 +8,8 @@ use Dvsa\Olcs\Cpms\Client\HttpClient;
 use Dvsa\Olcs\Cpms\Service\ApiService;
 use Dvsa\Olcs\Cpms\Test\Unit\Client\ClientOptionsTestTrait;
 use Dvsa\Olcs\Cpms\Test\Unit\Client\GuzzleTestTrait;
+use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Psr7\Request;
 use Monolog\Handler\TestHandler;
 use Monolog\Logger;
 use PHPUnit\Framework\TestCase;
@@ -197,6 +199,7 @@ class ApiServiceTest extends TestCase
 
     public function testGetCpmsAccessTokenFailureWithBadResponse()
     {
+
         $this->appendToHandler(400, [], json_encode(['code' => '105', 'message' => 'cannot process payment']));
 
         $params = [
@@ -227,12 +230,12 @@ class ApiServiceTest extends TestCase
             'total_amount' => 200,
             'payment_data' => []
         ];
-        
+
         $response = $sut->get('/get/payment-status', 'CARD', $params);
         $this->assertEquals('This is a non-guzzle exception', $response);
     }
 
-    public function testReturnErrorMessageWhenResponseMessageNull()
+    public function testReturnErrorMessageWhenResponse503()
     {
         $this->appendToHandler(503, [], json_encode(['code' => '105', 'message' => null]));
 
@@ -243,7 +246,42 @@ class ApiServiceTest extends TestCase
         ];
 
         $response = $this->sut->get('/get/payment-status', 'CARD', $params);
+        $this->assertContains("503 Service Unavailable",$response);
+    }
 
-        $this->assertEquals('Unknown CPMS error', $response);
+    public function testEmptyResponse()
+    {
+         $this->appendToHandler(200, [], $this->accessTokenResponse);
+         $this->appendToHandler(200, [],'');
+
+        $params = [
+            'batch_number' => 'abc123',
+            'total_amount' => 200,
+            'payment_data' => []
+        ];
+
+        $response = $this->sut->get('/get/payment-status', 'CARD', $params);
+
+        $this->assertEquals("CPMS error empty body", $response);
+    }
+
+
+
+    public function testReturnErrorMessageWhenResponseTimeout()
+    {
+        $this->mockHandler->append(new RequestException("Error: Request time out", new Request('GET', '/some-uri')));
+
+        $params = [
+            'batch_number' => 'abc123',
+            'total_amount' => 200,
+            'payment_data' => []
+        ];
+
+        $response = $this->sut->get('/get/payment-status', 'CARD', $params);
+
+        $this->assertEquals(
+            'Error: Request time out',
+            $response
+        );
     }
 }

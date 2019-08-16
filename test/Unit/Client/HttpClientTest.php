@@ -169,7 +169,7 @@ class HttpClientTest extends TestCase
         json_decode($badJson);
         $this->assertNotNull(json_last_error());
 
-        $this->appendToHandler(22, [], $badJson);
+        $this->appendToHandler(200, [], $badJson);
         $actual = $this->sut->get('/endpoint', []);
         $this->assertEquals($badJson, $actual);
     }

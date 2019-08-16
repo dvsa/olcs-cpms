@@ -148,7 +148,7 @@ class ApiService
     ) {
         $salesReference = $this->getSalesReferenceFromParams($params);
 
-        $message = 'Unknown CPMS error';
+        $message = 'CPMS error empty body';
         $messageObj = "{}";
 
         try {
@@ -160,6 +160,10 @@ class ApiService
                 $headers['Authorization'] = $token->getAuthorisationHeader();
                 $this->getOptions()->setHeaders($headers);
                 $response = $this->getHttpClient()->$method($endPoint, $params);
+
+                if (empty($response)) {
+                    throw new \Exception($message);
+                }
                 return $response;
             } else {
                 return $token;
@@ -172,8 +176,9 @@ class ApiService
                     $this->errorResponseBody->rewind();
                     $messageObj = json_decode($this->errorResponseBody->getContents());
                 }
+
             }
-            $message = $messageObj->message ?? $e->getMessage() ?? $message;
+            $message = $messageObj->message ?? $e->getMessage();
 
         } catch (\Exception $e) {
             $message = $e->getMessage();

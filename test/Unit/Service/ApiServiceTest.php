@@ -251,7 +251,8 @@ class ApiServiceTest extends TestCase
 
     public function testEmptyResponse()
     {
-         $this->appendToHandler(200, [],null);
+         $this->appendToHandler(200, [], $this->accessTokenResponse);
+         $this->appendToHandler(200, [],'');
 
         $params = [
             'batch_number' => 'abc123',
@@ -260,8 +261,10 @@ class ApiServiceTest extends TestCase
         ];
 
         $response = $this->sut->get('/get/payment-status', 'CARD', $params);
-        $this->assertEmpty($response);
+
+        $this->assertEquals("CPMS error empty body", $response);
     }
+
 
 
     public function testReturnErrorMessageWhenResponseTimeout()

@@ -8,6 +8,8 @@ use Dvsa\Olcs\Cpms\Authenticate\CpmsIdentityProvider;
 use Dvsa\Olcs\Cpms\Client\ClientOptions;
 use Dvsa\Olcs\Cpms\Client\HttpClient;
 use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Psr7\Response;
+use Psr\Http\Message\StreamInterface;
 use Psr\Log\LoggerInterface as Logger;
 
 class ApiService
@@ -48,6 +50,13 @@ class ApiService
      * @var CpmsIdentityProvider
      */
     protected $identity;
+
+
+    /**
+     * @var StreamInterface | string
+     */
+    private $errorResponseBody;
+
 
     public function __construct(
         HttpClient $httpClient,
@@ -140,6 +149,7 @@ class ApiService
         $salesReference = $this->getSalesReferenceFromParams($params);
 
         $message = 'Unknown CPMS error';
+        $messageObj = "{}";
 
         try {
             //Get access token
@@ -152,22 +162,27 @@ class ApiService
                 $this->getOptions()->setHeaders($headers);
 
                 $response = $this->getHttpClient()->$method($endPoint, $params);
+
                 return $response;
             } else {
                 return $token;
             }
         } catch (RequestException $e) {
             if ($e->hasResponse()) {
-                $responseBody = $e->getResponse()->getBody();
-                $responseBody->rewind();
-                $messageObj = json_decode($responseBody->getContents());
+                $response = $e->getResponse();
+                if ($response instanceof Response) {
+                    $this->errorResponseBody = $response->getBody();
+                    $this->errorResponseBody->rewind();
+                    $messageObj = json_decode($this->errorResponseBody->getContents());
+                }
             }
             $message = $messageObj->message ?? $e->getMessage() ?? $message;
-            return $this->returnErrorMessage($message);
+
         } catch (\Exception $e) {
             $message = $e->getMessage();
-            return $this->returnErrorMessage($message);
         }
+
+        return $this->returnErrorMessage($message);
     }
 
     /**

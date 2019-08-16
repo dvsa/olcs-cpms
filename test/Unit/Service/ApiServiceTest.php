@@ -199,6 +199,7 @@ class ApiServiceTest extends TestCase
 
     public function testGetCpmsAccessTokenFailureWithBadResponse()
     {
+
         $this->appendToHandler(400, [], json_encode(['code' => '105', 'message' => 'cannot process payment']));
 
         $params = [
@@ -234,7 +235,7 @@ class ApiServiceTest extends TestCase
         $this->assertEquals('This is a non-guzzle exception', $response);
     }
 
-    public function testReturnErrorMessageWhenResponseMessageNull()
+    public function testReturnErrorMessageWhenResponse503()
     {
         $this->appendToHandler(503, [], json_encode(['code' => '105', 'message' => null]));
 
@@ -245,9 +246,23 @@ class ApiServiceTest extends TestCase
         ];
 
         $response = $this->sut->get('/get/payment-status', 'CARD', $params);
-
-        $this->assertEquals('Unknown CPMS error', $response);
+        $this->assertContains("503 Service Unavailable",$response);
     }
+
+    public function testEmptyResponse()
+    {
+         $this->appendToHandler(200, [],null);
+
+        $params = [
+            'batch_number' => 'abc123',
+            'total_amount' => 200,
+            'payment_data' => []
+        ];
+
+        $response = $this->sut->get('/get/payment-status', 'CARD', $params);
+        $this->assertEmpty($response);
+    }
+
 
     public function testReturnErrorMessageWhenResponseTimeout()
     {
@@ -262,7 +277,7 @@ class ApiServiceTest extends TestCase
         $response = $this->sut->get('/get/payment-status', 'CARD', $params);
 
         $this->assertEquals(
-            'Server error: `POST api.cpms.domain/api/token` resulted in a `503 Service Unavailable` response:\n{"code":"105","message":null}\n',
+            'Error: Request time out',
             $response
         );
     }

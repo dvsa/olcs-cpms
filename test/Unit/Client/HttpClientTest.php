@@ -155,6 +155,25 @@ class HttpClientTest extends TestCase
         ];
     }
 
+    public function testEmptyIfNoResponseBody()
+    {
+        $this->appendToHandler();
+        $actual = $this->sut->get('/endpoint', []);
+        $this->assertEmpty($actual);
+    }
+
+    public function testBadlyFormedJsonResponseReturnsAsString()
+    {
+        $badJson = "{'test':'";
+        //testing bad json error
+        json_decode($badJson);
+        $this->assertNotNull(json_last_error());
+
+        $this->appendToHandler(22, [], $badJson);
+        $actual = $this->sut->get('/endpoint', []);
+        $this->assertEquals($badJson, $actual);
+    }
+
     /**
      * @dataProvider dpTestLogResponseOnFailure
      */

@@ -9,11 +9,11 @@
             "packagist": false
         },
         {
-            "url": "http://nexus.olcs.dev-dvsacloud.uk/repository/OLCS",
+            "url": "https://nexus.olcs.dev-dvsacloud.uk/repository/OLCS",
             "type": "composer"
         },
         {
-            "url": "http://nexus.olcs.dev-dvsacloud.uk/repository/Packagist-Proxy",
+            "url": "https://nexus.olcs.dev-dvsacloud.uk/repository/Packagist-Proxy",
             "type": "composer"
         }
     ],
@@ -50,7 +50,7 @@
             "dev-master": "0.1.x-dev"
         },
         "nexus-push": {
-            "url": "http://nexus.olcs.dev-dvsacloud.uk/repository/olcs-cpms",
+            "url": "https://nexus.olcs.dev-dvsacloud.uk/repository/olcs-cpms",
             "ignore": [
                 "tests"
             ]

@@ -27,7 +27,7 @@ class HttpClientTest extends TestCase
     private $logger;
 
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->logger = new Logger('cpms_client_logger');
         $this->logger->pushHandler(new TestHandler());

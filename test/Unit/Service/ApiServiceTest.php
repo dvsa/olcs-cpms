@@ -44,7 +44,7 @@ class ApiServiceTest extends TestCase
      */
     private $accessTokenResponse;
 
-    public function setUp()
+    public function setUp(): void
     {
         $userId = '555';
         $clientId = 'a-client-id';
@@ -246,7 +246,7 @@ class ApiServiceTest extends TestCase
         ];
 
         $response = $this->sut->get('/get/payment-status', 'CARD', $params);
-        $this->assertContains("503 Service Unavailable",$response);
+        $this->assertStringContainsString("503 Service Unavailable",$response);
     }
 
     public function testEmptyResponse()

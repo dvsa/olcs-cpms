@@ -108,7 +108,7 @@ class HttpClient
         switch ($method) {
             case self::METHOD_PUT:
             case self::METHOD_POST:
-                $options = $this->buildPostOrPutQuery($data, $method);
+                $options = $this->buildPostOrPutQuery($this->sanitiseDataCharset($data), $method);
                 break;
             case self::METHOD_GET:
             default:
@@ -137,6 +137,22 @@ class HttpClient
             ],
             'body' => json_encode($data)
         ];
+    }
+
+    /**
+     * Sanitizes strings submitted in JSON payload to safe charset for SAP export
+     *
+     * @param array $data
+     * @return array
+     */
+    protected function sanitiseDataCharset(array $data): array
+    {
+        array_walk_recursive($data, function (&$value) {
+            if (is_string($value)) {
+                $value = iconv(mb_detect_encoding($value), 'ISO-8859-1//TRANSLIT', $value);
+            }
+        });
+        return $data;
     }
 
     protected function getContentType(string $method): string

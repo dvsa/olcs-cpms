@@ -74,7 +74,7 @@ class HttpClientTest extends TestCase
 
     public function testPost()
     {
-        $requestBody = ['postRequestBodyKeyExample' => 'postRequestBodyValueExample'];
+        $requestBody = ['postRequestBodyKeyExample' => 'postRequestBodyValueExample’'];
         $encodedResponseBody = json_encode(['examplePostReponseKey' => 'examplePostResponseValue']);
 
         $this->appendToHandler(200, [], $encodedResponseBody);
@@ -89,11 +89,13 @@ class HttpClientTest extends TestCase
         );
         $this->assertEquals(['application/json'], $this->getLastRequest()->getHeader('Accept'));
         $this->assertEquals(['examplePostReponseKey' => 'examplePostResponseValue'], $response);
+        // Check unsupported unicode chrs are sanitized from the payload
+        $this->assertEquals($this->getLastRequest()->getBody()->getContents(), '{"postRequestBodyKeyExample":"postRequestBodyValueExample\'"}');
     }
 
     public function testPut()
     {
-        $requestBody = ['putRequestBodyKeyExample' => 'putRequestBodyValueExample'];
+        $requestBody = ['putRequestBodyKeyExample' => 'putRequestBodyValueExample’'];
         $encodedResponseBody = json_encode(['examplePutReponseKey' => 'examplePutResponseValue']);
 
         $this->appendToHandler(200, [], $encodedResponseBody);
@@ -108,6 +110,8 @@ class HttpClientTest extends TestCase
         );
         $this->assertEquals(['application/json'], $this->getLastRequest()->getHeader('Accept'));
         $this->assertEquals(['examplePutReponseKey' => 'examplePutResponseValue'], $response);
+        // Check unsupported unicode chrs are sanitized from the payload
+        $this->assertEquals($this->getLastRequest()->getBody()->getContents(), '{"putRequestBodyKeyExample":"putRequestBodyValueExample\'"}');
     }
 
     public function testResetHeaders()

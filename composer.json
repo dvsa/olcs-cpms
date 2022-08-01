@@ -20,7 +20,9 @@
     "require": {
         "php": ">=7.4",
         "guzzlehttp/guzzle": "^6.3",
-        "monolog/monolog": "^1.24"
+        "monolog/monolog": "^1.24",
+        "ext-mbstring": "*",
+        "ext-iconv": "*"
     },
     "require-dev": {
         "olcs/olcs-devtools": "~4.206.0"

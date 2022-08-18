@@ -149,7 +149,8 @@ class HttpClient
     {
         array_walk_recursive($data, function (&$value) {
             if (is_string($value)) {
-                $value = iconv(mb_detect_encoding($value), 'ISO-8859-1//TRANSLIT', $value);
+                ini_set('mbstring.substitute_character', "none");
+                $value = mb_convert_encoding($value, 'ASCII', mb_detect_encoding($value));
             }
         });
         return $data;
